@@ -56,7 +56,7 @@ func main() {
 		downloadSpeed := server.DownloadSpeed()
 		uploadSpeed := server.UploadSpeed()
 		// ping is ms, speeds are megabytes
-		log.Printf("ping: %d;down:%.2f;%.2f", server.Latency/time.Millisecond, float64(downloadSpeed)/(1<<20), float64(uploadSpeed)/(1<<20))
+		log.Printf("ping: %d;down:%.2f;up:%.2f", server.Latency/time.Millisecond, float64(downloadSpeed)/(1<<20), float64(uploadSpeed)/(1<<20))
 	}
 }
 
