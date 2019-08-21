@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/surol/speedtest-cli/speedtest"
-	"fmt"
-	"os"
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"time"
+
+	"github.com/crepehat/speedtest-cli/speedtest"
 )
 
 func version() {
@@ -48,22 +49,24 @@ func main() {
 
 	client.Log("Testing from %s (%s)...\n", config.Client.ISP, config.Client.IP)
 
-	server := selectServer(opts, client);
+	ticker := time.NewTicker(1 * time.Minute)
 
-	downloadSpeed := server.DownloadSpeed()
-	reportSpeed(opts, "Download", downloadSpeed)
-
-	uploadSpeed := server.UploadSpeed()
-	reportSpeed(opts, "Upload", uploadSpeed)
-}
-
-func reportSpeed(opts *speedtest.Opts, prefix string, speed int) {
-	if opts.SpeedInBytes {
-		fmt.Printf("%s: %.2f MiB/s\n", prefix, float64(speed) / (1 << 20))
-	} else {
-		fmt.Printf("%s: %.2f Mib/s\n", prefix, float64(speed) / (1 << 17))
+	for ; true; <-ticker.C {
+		server := selectServer(opts, client)
+		downloadSpeed := server.DownloadSpeed()
+		uploadSpeed := server.UploadSpeed()
+		// ping is ms, speeds are megabytes
+		log.Printf("ping: %d;down:%.2f;%.2f", server.Latency/time.Millisecond, float64(downloadSpeed)/(1<<20), float64(uploadSpeed)/(1<<20))
 	}
 }
+
+// func reportSpeed(opts *speedtest.Opts, prefix string, speed int) {
+// 	if opts.SpeedInBytes {
+// 		fmt.Printf("%s: %.2f MiB/s\n", prefix, float64(speed)/(1<<20))
+// 	} else {
+// 		fmt.Printf("%s: %.2f Mib/s\n", prefix, float64(speed)/(1<<17))
+// 	}
+// }
 
 func selectServer(opts *speedtest.Opts, client speedtest.Client) (selected *speedtest.Server) {
 	if opts.Server != 0 {
@@ -89,14 +92,12 @@ func selectServer(opts *speedtest.Opts, client speedtest.Client) (selected *spee
 			speedtest.DefaultErrorLatency).First()
 	}
 
-	if opts.Quiet {
-		log.Printf("Ping: %d ms\n", selected.Latency / time.Millisecond)
-	} else {
+	if !opts.Quiet {
 		client.Log("Hosted by %s (%s) [%.2f km]: %d ms\n",
 			selected.Sponsor,
 			selected.Name,
 			selected.Distance,
-			selected.Latency / time.Millisecond)
+			selected.Latency/time.Millisecond)
 	}
 
 	return selected

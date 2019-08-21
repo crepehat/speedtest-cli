@@ -10,8 +10,8 @@ Installation
 
 Run te following commands in console
 ```
-go get github.com/surol/speedtest-cli
-go install github.com/surol/speedtest-cli
+go get github.com/crepehat/speedtest-cli
+go install github.com/crepehat/speedtest-cli
 ```
 
 Usage
